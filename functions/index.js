@@ -49,7 +49,7 @@ app.post("/filterData", async (req, res) => {
         return item.username === req.body.username
     })
     
-    res.send(dataUser);
+    res.send(JSON.stringify(dataUser).replace("[", "").replace("]", ""));
   })
 
 app.delete("/deleteUser/:id", async (req, res) => {
