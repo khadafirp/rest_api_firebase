@@ -6,14 +6,37 @@ const cors = require('cors');
 const app = express();
 admin.initializeApp();
 
-app.post("/", async (req, res) => {
+app.post("/addUser", async (req, res) => {
     const db = admin.firestore();
-    const user = req.body;
+    const user = 
+        {
+            username: req.body.username,
+            password: req.body.password,
+            posisi: req.body.posisi,
+            nama_lengkap: req.body.nama_lengkap,
+            tanggal_lahir: req.body.tanggal_lahir,
+            no_hp: req.body.no_hp,
+            alamat: req.body.alamat,
+            status_aktif: req.body.status_aktif
+        };
     
     await db.collection("user_admin").add(user);
 
-    res.status(200).send("Data has been added")
-
+    try{
+        res.status(200).send(
+            {
+                statusCode: 200,
+                message: "success"
+            }
+        )
+    }catch(error){
+        res.status(500).send(
+            {
+                statusCode: 500,
+                message: "internal server error"
+            }
+        )
+    }
 })
 
 app.get("/user", async (req, res) => {
@@ -30,7 +53,7 @@ app.get("/user", async (req, res) => {
     res.status(200).send(JSON.stringify(users))
 })
 
-app.post("/filterData", async (req, res) => {
+app.post("/filterDataUser", async (req, res) => {
     var snapshot = await admin.firestore().collection('user_admin').get();
     
     // const userId = snapshot.username;
@@ -45,11 +68,22 @@ app.post("/filterData", async (req, res) => {
     })
     
 
-    var dataUser = users.filter(function(item){
-        return item.username === req.body.username
-    })
-    
-    res.send(JSON.stringify(dataUser).replace("[", "").replace("]", ""));
+    // var dataUser = users.filter(function(item){
+    //     return item.username === req.body.username
+    // })
+
+    var dataUser = users.find(c => c.username === req.body.username)
+
+    if(!dataUser){
+        res.status(404).send(
+            {
+                statusCode: 404,
+                message: "Data is not found"
+            }
+        )
+    }else{
+        res.send(JSON.stringify(dataUser).replace("[", "").replace("]", ""));
+    }
   })
 
 app.delete("/deleteUser/:id", async (req, res) => {
